@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TLDW - Loading...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    .prose h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; }
+    .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    .prose h4 { font-size: 1.1rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    .prose p { margin-bottom: 0.75rem; line-height: 1.7; }
+    .prose ul, .prose ol { margin-bottom: 0.75rem; padding-left: 1.5rem; }
+    .prose li { margin-bottom: 0.25rem; line-height: 1.6; }
+    .prose ul { list-style-type: disc; }
+    .prose ol { list-style-type: decimal; }
+    .prose a { color: #3b82f6; text-decoration: underline; }
+    .prose a:hover { color: #2563eb; }
+    .dark .prose a { color: #60a5fa; }
+    .dark .prose a:hover { color: #93bbfd; }
+    .prose img { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+    .prose strong { font-weight: 600; }
+    .prose blockquote { border-left: 3px solid #d1d5db; padding-left: 1rem; color: #6b7280; margin: 1rem 0; }
+    .dark .prose blockquote { border-left-color: #4b5563; color: #9ca3af; }
+    .metric-bar-bg {
+      height: 8px; border-radius: 4px;
+      background: #e5e7eb;
+    }
+    .dark .metric-bar-bg { background: #374151; }
+    .metric-bar-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+    @keyframes pulse-dot {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+    .loading-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      display: inline-block; animation: pulse-dot 1.4s infinite ease-in-out both;
+    }
+    .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+  </style>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen transition-colors">
+  <header class="border-b border-gray-200 dark:border-gray-700 px-6 py-3">
+    <a href="/" class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+      TLDW
+    </a>
+  </header>
+
+  <!-- Loading state -->
+  <div id="loading" class="flex flex-col items-center justify-center py-32">
+    <div class="flex gap-2 mb-4">
+      <div class="loading-dot bg-blue-500"></div>
+      <div class="loading-dot bg-red-500"></div>
+      <div class="loading-dot bg-yellow-500"></div>
+    </div>
+    <p id="loading-text" class="text-gray-500 dark:text-gray-400 text-lg">Checking database...</p>
+  </div>
+
+  <!-- Error state -->
+  <div id="error" class="hidden flex flex-col items-center justify-center py-32">
+    <p class="text-red-500 text-xl mb-2">Something went wrong</p>
+    <p id="error-detail" class="text-gray-500 dark:text-gray-400"></p>
+    <a href="/" class="mt-4 text-blue-500 hover:underline">Back to home</a>
+  </div>
+
+  <!-- Content -->
+  <div id="content" class="hidden max-w-3xl mx-auto px-6 py-8">
+    <div class="mb-8">
+      <h2 id="channel-name" class="text-2xl font-bold text-gray-900 dark:text-gray-100"></h2>
+      <p id="channel-description" class="text-gray-600 dark:text-gray-400 mt-1"></p>
+    </div>
+    <hr class="my-6 border-gray-200 dark:border-gray-700">
+    <div class="mb-8">
+      <h2 id="video-title" class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"></h2>
+      <a id="thumbnail-link" href="#" target="_blank">
+        <img id="thumbnail" class="w-full rounded-lg shadow-sm mb-4" alt="" />
+      </a>
+    </div>
+    <hr class="my-6 border-gray-200 dark:border-gray-700">
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Abstract</h3>
+      <p id="abstract" class="text-gray-700 dark:text-gray-300 leading-relaxed"></p>
+    </div>
+    <hr class="my-6 border-gray-200 dark:border-gray-700">
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Summary</h3>
+      <div id="summary" class="prose text-gray-700 dark:text-gray-300"></div>
+    </div>
+    <!-- Metrics -->
+    <div id="metrics" class="hidden mb-8">
+      <hr class="my-6 border-gray-200 dark:border-gray-700">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Content Metrics</h3>
+      <div class="grid grid-cols-2 gap-4" id="metrics-grid"></div>
+    </div>
+
+    <div class="flex gap-3 py-6 border-t border-gray-200 dark:border-gray-700">
+      <a id="download-md" href="#" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+        Download Markdown
+      </a>
+      <a id="youtube-link" href="#" target="_blank" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition">
+        Watch Original
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const videoId = window.location.pathname.replace('/', '');
+
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+      showError('Invalid video ID');
+    } else {
+      loadVideo(videoId);
+    }
+
+    async function loadVideo(id) {
+      try {
+        setLoading('Checking database...');
+        const checkRes = await fetch(`/api/video/${id}`);
+        const checkData = await checkRes.json();
+        if (checkData.found) {
+          renderVideo(checkData.video);
+          return;
+        }
+
+        setLoading('Fetching captions and generating AI summary... This may take a moment.');
+        const processRes = await fetch(`/api/process/${id}`, { method: 'POST' });
+
+        if (!processRes.ok) {
+          const err = await processRes.json();
+          throw new Error(err.error || 'Processing failed');
+        }
+
+        const processData = await processRes.json();
+        renderVideo(processData.video);
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    function setLoading(text) {
+      document.getElementById('loading-text').textContent = text;
+    }
+
+    function showError(message) {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('error').classList.remove('hidden');
+      document.getElementById('error-detail').textContent = message;
+    }
+
+    function renderVideo(video) {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('content').classList.remove('hidden');
+      document.title = `TLDW - ${video.video_title}`;
+      document.getElementById('channel-name').textContent = video.channel_name;
+      document.getElementById('channel-description').textContent = video.channel_description || '';
+      document.getElementById('video-title').textContent = video.video_title;
+      document.getElementById('thumbnail').src = video.thumbnail_url;
+      document.getElementById('thumbnail').alt = video.video_title;
+      document.getElementById('thumbnail-link').href = `https://www.youtube.com/watch?v=${video.video_id}`;
+      document.getElementById('abstract').textContent = video.abstract;
+      document.getElementById('summary').innerHTML = marked.parse(video.summary || '');
+      document.getElementById('download-md').href = `/api/video/${video.video_id}/markdown`;
+      document.getElementById('youtube-link').href = `https://www.youtube.com/watch?v=${video.video_id}`;
+
+      // Render metrics
+      const metrics = [
+        { key: 'signal_density', label: 'Signal Density', desc: 'Substance per minute', color: '#3b82f6' },
+        { key: 'perishability', label: 'Perishability', desc: 'How fast value decays', color: '#ef4444' },
+        { key: 'replaceability', label: 'Replaceability', desc: 'Available elsewhere?', color: '#f59e0b' },
+        { key: 'novelty', label: 'Novelty', desc: 'How fresh is this?', color: '#10b981' },
+      ];
+      const hasMetrics = metrics.some(m => video[m.key] != null);
+      if (hasMetrics) {
+        const grid = document.getElementById('metrics-grid');
+        grid.innerHTML = '';
+        metrics.forEach(m => {
+          const val = video[m.key] ?? 0;
+          grid.innerHTML += `
+            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div class="flex justify-between items-baseline mb-1">
+                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${m.label}</span>
+                <span class="text-lg font-bold" style="color:${m.color}">${val}/10</span>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">${m.desc}</p>
+              <div class="metric-bar-bg">
+                <div class="metric-bar-fill" style="width:${val * 10}%;background:${m.color}"></div>
+              </div>
+            </div>`;
+        });
+        document.getElementById('metrics').classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
