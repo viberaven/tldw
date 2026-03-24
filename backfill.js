@@ -24,7 +24,7 @@ const update = db.prepare(`
     try {
       let channelId = video.channel_id;
       if (!channelId) {
-        console.log(`[${video_id}] Fetching channel ID via yt-dlp...`);
+        console.log(`[${video_id}] Fetching channel ID...`);
         channelId = await fetchChannelId(video_id);
       }
       if (!channelId) {

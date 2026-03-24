@@ -174,28 +174,51 @@ async function fetchChannelInfo(channelId) {
   if (ogMatch) description = decodeHtmlEntities(ogMatch[1]);
 
   let avatarUrl = '';
-  // YouTube renders og:image via JS, so extract avatar from yt3.ggpht.com URLs in page data
-  const avatarMatch = html.match(/https:\/\/yt3\.ggpht\.com\/[^"\\=]+(?:=s\d+-[^"\\]*)?/);
+  // Extract avatar from the "avatar":{"thumbnails":[{"url":"..."}]} JSON in the page
+  const avatarMatch = html.match(/"avatar":\{"thumbnails":\[\{"url":"([^"]+)"/);
   if (avatarMatch) {
-    // Normalize to a consistent small size
-    avatarUrl = avatarMatch[0].replace(/=s\d+.*$/, '=s176-c-k-c0x00ffffff-no-rj');
+    avatarUrl = avatarMatch[1].replace(/=s\d+[^"]*$/, '=s176-c-k-c0x00ffffff-no-rj');
   }
 
   return { description, avatarUrl };
 }
 
 async function fetchChannelId(videoId) {
-  const url = `https://www.youtube.com/watch?v=${videoId}`;
-  const response = await fetch(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-      'Accept-Language': 'en-US,en;q=0.9',
+  // Try oembed first (lightweight, no bot detection)
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+    const oembedRes = await fetch(oembedUrl);
+    if (oembedRes.ok) {
+      const data = await oembedRes.json();
+      if (data.author_url) {
+        const channelPage = await fetch(data.author_url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+          },
+          redirect: 'follow'
+        });
+        if (channelPage.ok) {
+          const html = await channelPage.text();
+          const match = html.match(/"channelId":"([^"]+)"/);
+          if (match) return match[1];
+        }
+      }
     }
-  });
-  if (!response.ok) return null;
-  const html = await response.text();
-  const match = html.match(/"channelId":"([^"]+)"/);
-  return match ? match[1] : null;
+  } catch { /* fall through */ }
+
+  // Fallback: yt-dlp with cookies
+  try {
+    const cookiesFile = path.join(__dirname, 'data', 'cookies.txt');
+    const cookiesArgs = fs.existsSync(cookiesFile) ? ['--cookies', cookiesFile] : [];
+    const { stdout } = await execFileAsync('uvx', [
+      'yt-dlp', ...cookiesArgs, '--dump-json', '--skip-download',
+      `https://www.youtube.com/watch?v=${videoId}`
+    ], { maxBuffer: 10 * 1024 * 1024, timeout: 60000, shell: true });
+    const meta = JSON.parse(stdout);
+    return meta.channel_id || null;
+  } catch { /* ignore */ }
+
+  return null;
 }
 
 module.exports = { fetchVideoData, fetchChannelInfo, fetchChannelId };
