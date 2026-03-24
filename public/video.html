@@ -79,9 +79,12 @@
 
   <!-- Content -->
   <div id="content" class="hidden max-w-3xl mx-auto px-6 py-8">
-    <div class="mb-8">
-      <h2 id="channel-name" class="text-2xl font-bold text-gray-900 dark:text-gray-100"></h2>
-      <p id="channel-description" class="text-gray-600 dark:text-gray-400 mt-1"></p>
+    <div class="mb-8 flex items-start gap-4">
+      <img id="channel-avatar" class="flex-shrink-0 w-12 h-12 rounded-full mt-1 hidden" alt="" />
+      <div>
+        <h2 id="channel-name" class="text-2xl font-bold text-gray-900 dark:text-gray-100"></h2>
+        <p id="channel-description" class="text-gray-600 dark:text-gray-400 mt-1"></p>
+      </div>
     </div>
     <hr class="my-6 border-gray-200 dark:border-gray-700">
     <div class="mb-8">
@@ -167,6 +170,12 @@
       document.title = `TLDW - ${video.video_title}`;
       document.getElementById('channel-name').textContent = video.channel_name;
       document.getElementById('channel-description').textContent = video.channel_description || '';
+      if (video.channel_avatar_url) {
+        const avatar = document.getElementById('channel-avatar');
+        avatar.src = video.channel_avatar_url;
+        avatar.alt = video.channel_name;
+        avatar.classList.remove('hidden');
+      }
       document.getElementById('video-title').textContent = video.video_title;
       document.getElementById('thumbnail').src = video.thumbnail_url;
       document.getElementById('thumbnail').alt = video.video_title;

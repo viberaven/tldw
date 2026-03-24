@@ -127,11 +127,14 @@ async function fetchVideoData(videoId) {
       throw new Error('Failed to parse captions');
     }
 
-    // Get channel description
+    // Get channel description and avatar
     let channelDescription = '';
+    let channelAvatarUrl = '';
     if (meta.channel_id) {
       try {
-        channelDescription = await fetchChannelDescription(meta.channel_id);
+        const channelInfo = await fetchChannelInfo(meta.channel_id);
+        channelDescription = channelInfo.description;
+        channelAvatarUrl = channelInfo.avatarUrl;
       } catch { /* non-critical */ }
     }
 
@@ -142,6 +145,7 @@ async function fetchVideoData(videoId) {
       author: meta.channel || meta.uploader || 'Unknown',
       channelId: meta.channel_id,
       channelDescription,
+      channelAvatarUrl,
       thumbnailUrl: meta.thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
       captions,
       captionsText: captionsToText(captions),
@@ -153,7 +157,7 @@ async function fetchVideoData(videoId) {
   }
 }
 
-async function fetchChannelDescription(channelId) {
+async function fetchChannelInfo(channelId) {
   const url = `https://www.youtube.com/channel/${channelId}`;
   const response = await fetch(url, {
     headers: {
@@ -162,14 +166,36 @@ async function fetchChannelDescription(channelId) {
       'Cookie': 'CONSENT=PENDING+999'
     }
   });
-  if (!response.ok) return '';
+  if (!response.ok) return { description: '', avatarUrl: '' };
   const html = await response.text();
 
-  // Try og:description
+  let description = '';
   const ogMatch = html.match(/<meta\s+property="og:description"\s+content="([^"]*?)"/);
-  if (ogMatch) return decodeHtmlEntities(ogMatch[1]);
+  if (ogMatch) description = decodeHtmlEntities(ogMatch[1]);
 
-  return '';
+  let avatarUrl = '';
+  // YouTube renders og:image via JS, so extract avatar from yt3.ggpht.com URLs in page data
+  const avatarMatch = html.match(/https:\/\/yt3\.ggpht\.com\/[^"\\=]+(?:=s\d+-[^"\\]*)?/);
+  if (avatarMatch) {
+    // Normalize to a consistent small size
+    avatarUrl = avatarMatch[0].replace(/=s\d+.*$/, '=s176-c-k-c0x00ffffff-no-rj');
+  }
+
+  return { description, avatarUrl };
 }
 
-module.exports = { fetchVideoData };
+async function fetchChannelId(videoId) {
+  const url = `https://www.youtube.com/watch?v=${videoId}`;
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      'Accept-Language': 'en-US,en;q=0.9',
+    }
+  });
+  if (!response.ok) return null;
+  const html = await response.text();
+  const match = html.match(/"channelId":"([^"]+)"/);
+  return match ? match[1] : null;
+}
+
+module.exports = { fetchVideoData, fetchChannelInfo, fetchChannelId };

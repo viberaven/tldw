@@ -48,8 +48,10 @@ app.post('/api/process/:videoId', async (req, res) => {
 
     const videoRecord = {
       videoId,
+      channelId: ytData.channelId,
       channelName: ytData.author,
       channelDescription: ytData.channelDescription,
+      channelAvatarUrl: ytData.channelAvatarUrl,
       videoTitle: ytData.title,
       videoDescription: ytData.description,
       thumbnailUrl: ytData.thumbnailUrl,
