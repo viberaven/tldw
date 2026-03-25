@@ -1,5 +1,5 @@
 module.exports = {
   GOOGLE_API_KEY: "KEY",
 
-  MODEL: "gemini-3.1-flash-lite-preview",
+  MODEL: "gemini-3.1-pro-preview",
 };
