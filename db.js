@@ -77,4 +77,8 @@ function saveVideo(data) {
   );
 }
 
-module.exports = { getVideo, saveVideo };
+function getAllVideos() {
+  return db.prepare('SELECT video_id, channel_name, channel_avatar_url, video_title, thumbnail_url, processed_at FROM videos ORDER BY processed_at DESC').all();
+}
+
+module.exports = { getVideo, saveVideo, getAllVideos };

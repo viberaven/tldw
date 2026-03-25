@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { getVideo, saveVideo } = require('./db');
+const { getVideo, saveVideo, getAllVideos } = require('./db');
 const { fetchVideoData } = require('./youtube');
 const { processVideo } = require('./gemini');
 const config = require('./config');
@@ -96,6 +96,16 @@ const videoHtmlTemplate = fs.readFileSync(path.join(__dirname, 'public', 'video.
 function generateMarkdown(video) {
   return markdownTemplate.replace(/\{\{(\w+)\}\}/g, (_, key) => video[key] || '');
 }
+
+// API: Get all videos
+app.get('/api/videos', (req, res) => {
+  res.json(getAllVideos());
+});
+
+// All videos page
+app.get('/all', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'all.html'));
+});
 
 // Catch-all: serve video page with OG meta tags
 app.get('/:videoId', (req, res) => {
