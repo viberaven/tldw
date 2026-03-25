@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "backfill": "node backfill.js"
+    "backfill": "node backfill.js",
+    "resummarize": "node resummarize.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
