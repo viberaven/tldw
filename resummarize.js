@@ -14,7 +14,7 @@ if (videos.length === 0) {
 console.log(`Found ${videos.length} video(s) to resummarize.\n`);
 
 const update = db.prepare(`
-  UPDATE videos SET abstract = ?, summary = ?, signal_density = ?, perishability = ?, replaceability = ?, novelty = ? WHERE video_id = ?
+  UPDATE videos SET abstract = ?, summary = ? WHERE video_id = ?
 `);
 
 (async () => {
@@ -33,10 +33,6 @@ const update = db.prepare(`
       update.run(
         aiResult.abstract,
         aiResult.summary,
-        aiResult.signal_density ?? null,
-        aiResult.perishability ?? null,
-        aiResult.replaceability ?? null,
-        aiResult.novelty ?? null,
         video.video_id
       );
       done++;

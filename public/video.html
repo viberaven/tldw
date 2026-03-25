@@ -32,16 +32,7 @@
     .prose strong { font-weight: 600; }
     .prose blockquote { border-left: 3px solid #d1d5db; padding-left: 1rem; color: #6b7280; margin: 1rem 0; }
     .dark .prose blockquote { border-left-color: #4b5563; color: #9ca3af; }
-    .metric-bar-bg {
-      height: 8px; border-radius: 4px;
-      background: #e5e7eb;
-    }
-    .dark .metric-bar-bg { background: #374151; }
-    .metric-bar-fill {
-      height: 100%; border-radius: 4px;
-      transition: width 0.6s ease;
-    }
-    @keyframes pulse-dot {
+@keyframes pulse-dot {
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1); }
     }
@@ -103,14 +94,7 @@
       <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Summary</h3>
       <div id="summary" class="prose text-gray-700 dark:text-gray-300"></div>
     </div>
-    <!-- Metrics -->
-    <div id="metrics" class="hidden mb-8">
-      <hr class="my-6 border-gray-200 dark:border-gray-700">
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Content Metrics</h3>
-      <div class="grid grid-cols-2 gap-4" id="metrics-grid"></div>
-    </div>
-
-    <div class="flex gap-3 py-6 border-t border-gray-200 dark:border-gray-700">
+<div class="flex gap-3 py-6 border-t border-gray-200 dark:border-gray-700">
       <a id="download-md" href="#" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
         Download Markdown
       </a>
@@ -185,33 +169,6 @@
       document.getElementById('download-md').href = `/api/video/${video.video_id}/markdown`;
       document.getElementById('youtube-link').href = `https://www.youtube.com/watch?v=${video.video_id}`;
 
-      // Render metrics
-      const metrics = [
-        { key: 'signal_density', label: 'Signal Density', desc: 'Substance per minute', color: '#3b82f6' },
-        { key: 'perishability', label: 'Perishability', desc: 'How fast value decays', color: '#ef4444' },
-        { key: 'replaceability', label: 'Replaceability', desc: 'Available elsewhere?', color: '#f59e0b' },
-        { key: 'novelty', label: 'Novelty', desc: 'How fresh is this?', color: '#10b981' },
-      ];
-      const hasMetrics = metrics.some(m => video[m.key] != null);
-      if (hasMetrics) {
-        const grid = document.getElementById('metrics-grid');
-        grid.innerHTML = '';
-        metrics.forEach(m => {
-          const val = video[m.key] ?? 0;
-          grid.innerHTML += `
-            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-              <div class="flex justify-between items-baseline mb-1">
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${m.label}</span>
-                <span class="text-lg font-bold" style="color:${m.color}">${val}/10</span>
-              </div>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">${m.desc}</p>
-              <div class="metric-bar-bg">
-                <div class="metric-bar-fill" style="width:${val * 10}%;background:${m.color}"></div>
-              </div>
-            </div>`;
-        });
-        document.getElementById('metrics').classList.remove('hidden');
-      }
     }
   </script>
 </body>

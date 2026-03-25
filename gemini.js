@@ -34,20 +34,10 @@ Your task:
 
 IMPORTANT: Write everything in the same language as the captions/video title. If the video is in Czech, write in Czech. If in English, write in English. Etc.
 
-3. Rate the video on 4 metrics, each an integer from 0 to 10:
-   - "signal_density": Substance per minute — how much meaningful, actionable content vs filler, repetition, ads, and small talk. 10 = every minute delivers insight; 0 = pure fluff.
-   - "perishability": How fast the value decays — does this content have a short shelf life (news, current events, trending drama) or is it evergreen (deep knowledge, timeless principles)? 10 = worthless in a week; 0 = valuable for years.
-   - "replaceability": Can you get this information elsewhere faster — is this a unique perspective/source, or widely available commodity information? 10 = easily found in a blog post or Wikipedia; 0 = only available here.
-   - "novelty": How fresh is the information — does this present genuinely new ideas, data, or framing, or is it rehashing well-known content? 10 = completely new; 0 = common knowledge repeated.
-
 Respond ONLY with valid JSON in this exact format (no markdown code blocks, just raw JSON):
 {
   "abstract": "Three sentence abstract here.",
-  "summary": "Detailed markdown summary with [timestamp links](T=123s) here.",
-  "signal_density": 7,
-  "perishability": 3,
-  "replaceability": 4,
-  "novelty": 6
+  "summary": "Detailed markdown summary with [timestamp links](T=123s) here."
 }`;
 
   function replaceTimestamps(summary) {
@@ -68,11 +58,7 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
     const parsed = JSON.parse(jsonStr);
     return {
       abstract: parsed.abstract,
-      summary: replaceTimestamps(parsed.summary),
-      signal_density: parsed.signal_density,
-      perishability: parsed.perishability,
-      replaceability: parsed.replaceability,
-      novelty: parsed.novelty
+      summary: replaceTimestamps(parsed.summary)
     };
   } catch (e) {
     // Try to extract JSON from the response
@@ -83,11 +69,7 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
       const parsed = JSON.parse(extracted);
       return {
         abstract: parsed.abstract,
-        summary: replaceTimestamps(parsed.summary),
-        signal_density: parsed.signal_density,
-        perishability: parsed.perishability,
-        replaceability: parsed.replaceability,
-        novelty: parsed.novelty
+        summary: replaceTimestamps(parsed.summary)
       };
     }
     throw new Error(`Failed to parse Gemini response: ${e.message}`);

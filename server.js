@@ -58,11 +58,7 @@ app.post('/api/process/:videoId', async (req, res) => {
       abstract: aiResult.abstract,
       summary: aiResult.summary,
       captionsRaw: ytData.captionsText,
-      captionLanguage: ytData.captionLanguage,
-      signalDensity: aiResult.signal_density,
-      perishability: aiResult.perishability,
-      replaceability: aiResult.replaceability,
-      novelty: aiResult.novelty
+      captionLanguage: ytData.captionLanguage
     };
 
     saveVideo(videoRecord);
