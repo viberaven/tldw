@@ -1,79 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TLDW - Too Long Didn't Watch</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' };
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  </script>
-  <style>
-    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-  </style>
-</head>
-<body class="bg-white dark:bg-gray-900 min-h-screen flex flex-col items-center justify-center transition-colors">
-  <div class="text-center w-full max-w-2xl px-4">
-    <h1 class="text-7xl font-bold mb-10 tracking-tight text-gray-900 dark:text-gray-100">
-      TLDW
-    </h1>
-
-    <form id="search-form" class="w-full">
-      <div class="relative">
-        <input
-          type="text"
-          id="url-input"
-          placeholder="Paste YouTube video URL..."
-          autocomplete="off"
-          class="w-full px-6 py-4 text-lg border border-gray-300 dark:border-gray-600 rounded-full shadow-sm hover:shadow-md focus:shadow-md focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 transition-shadow bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-        />
-      </div>
-      <div class="mt-6 flex justify-center gap-3">
-        <button type="submit" class="px-6 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm transition">
-          Summarize
-        </button>
-      </div>
-    </form>
-
-    <p id="error-msg" class="mt-4 text-red-500 text-sm hidden"></p>
-  </div>
-
-  <script>
-    const form = document.getElementById('search-form');
-    const input = document.getElementById('url-input');
-    const errorMsg = document.getElementById('error-msg');
-
-    function extractVideoId(url) {
-      url = url.trim();
-      if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-      const patterns = [
-        /(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/
-      ];
-      for (const p of patterns) {
-        const m = url.match(p);
-        if (m) return m[1];
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TLDW - Too Long Didn't Watch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
       }
-      return null;
-    }
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      errorMsg.classList.add('hidden');
-      const videoId = extractVideoId(input.value);
-      if (!videoId) {
-        errorMsg.textContent = 'Please enter a valid YouTube URL';
-        errorMsg.classList.remove('hidden');
-        return;
+    </script>
+    <style>
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
       }
-      window.location.href = '/' + videoId;
-    });
+    </style>
+  </head>
+  <body
+    class="bg-white dark:bg-gray-900 min-h-screen flex flex-col items-center justify-center transition-colors"
+  >
+    <div class="text-center w-full max-w-2xl px-4">
+      <h1
+        class="text-7xl font-bold mb-10 tracking-tight text-gray-900 dark:text-gray-100"
+      >
+        TLDW
+      </h1>
 
-    input.focus();
-  </script>
-</body>
+      <form id="search-form" class="w-full">
+        <div class="relative">
+          <input
+            type="text"
+            id="url-input"
+            placeholder="Paste YouTube video URL..."
+            autocomplete="off"
+            class="w-full px-6 py-4 text-lg border border-gray-300 dark:border-gray-600 rounded-full shadow-sm hover:shadow-md focus:shadow-md focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 transition-shadow bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          />
+        </div>
+        <div class="mt-6 flex justify-center gap-3">
+          <button
+            type="submit"
+            class="px-6 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm transition"
+          >
+            Summarize
+          </button>
+        </div>
+      </form>
+
+      <p id="error-msg" class="mt-4 text-red-500 text-sm hidden"></p>
+    </div>
+
+    <script>
+      const form = document.getElementById("search-form");
+      const input = document.getElementById("url-input");
+      const errorMsg = document.getElementById("error-msg");
+
+      function extractVideoId(url) {
+        url = url.trim();
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+        const patterns = [
+          /(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+        ];
+        for (const p of patterns) {
+          const m = url.match(p);
+          if (m) return m[1];
+        }
+        return null;
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        errorMsg.classList.add("hidden");
+        const videoId = extractVideoId(input.value);
+        if (!videoId) {
+          errorMsg.textContent = "Please enter a valid YouTube URL";
+          errorMsg.classList.remove("hidden");
+          return;
+        }
+        window.location.href = "/" + videoId;
+      });
+
+      input.focus();
+    </script>
+  </body>
 </html>

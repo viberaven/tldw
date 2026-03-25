@@ -1,5 +1,5 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const config = require('./config');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const config = require("./config");
 
 const genAI = new GoogleGenerativeAI(config.GOOGLE_API_KEY);
 
@@ -41,7 +41,10 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
 }`;
 
   function replaceTimestamps(summary) {
-    return summary.replace(/\(T=(\d+)s\)/g, `(https://www.youtube.com/watch?v=${videoData.videoId}&t=$1s)`);
+    return summary.replace(
+      /\(T=(\d+)s\)/g,
+      `(https://www.youtube.com/watch?v=${videoData.videoId}&t=$1s)`,
+    );
   }
 
   const result = await model.generateContent(prompt);
@@ -58,18 +61,18 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
     const parsed = JSON.parse(jsonStr);
     return {
       abstract: parsed.abstract,
-      summary: replaceTimestamps(parsed.summary)
+      summary: replaceTimestamps(parsed.summary),
     };
   } catch (e) {
     // Try to extract JSON from the response
-    const startIdx = responseText.indexOf('{');
-    const endIdx = responseText.lastIndexOf('}');
+    const startIdx = responseText.indexOf("{");
+    const endIdx = responseText.lastIndexOf("}");
     if (startIdx !== -1 && endIdx !== -1) {
       const extracted = responseText.substring(startIdx, endIdx + 1);
       const parsed = JSON.parse(extracted);
       return {
         abstract: parsed.abstract,
-        summary: replaceTimestamps(parsed.summary)
+        summary: replaceTimestamps(parsed.summary),
       };
     }
     throw new Error(`Failed to parse Gemini response: ${e.message}`);

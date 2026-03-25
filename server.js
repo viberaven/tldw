@@ -1,23 +1,22 @@
-const express = require('express');
-const path = require('path');
-const { getVideo, saveVideo, getAllVideos } = require('./db');
-const { fetchVideoData } = require('./youtube');
-const { processVideo } = require('./gemini');
-const config = require('./config');
+const express = require("express");
+const path = require("path");
+const { getVideo, saveVideo, getAllVideos } = require("./db");
+const { fetchVideoData } = require("./youtube");
+const { processVideo } = require("./gemini");
+const config = require("./config");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "localhost";
 
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.static(path.join(__dirname, "public")));
 
 // API: Check if video exists in DB
-app.get('/api/video/:videoId', (req, res) => {
+app.get("/api/video/:videoId", (req, res) => {
   const { videoId } = req.params;
   if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-    return res.status(400).json({ error: 'Invalid video ID' });
+    return res.status(400).json({ error: "Invalid video ID" });
   }
   const video = getVideo(videoId);
   if (video) {
@@ -27,10 +26,10 @@ app.get('/api/video/:videoId', (req, res) => {
 });
 
 // API: Process a video (fetches data via yt-dlp, processes with Gemini)
-app.post('/api/process/:videoId', async (req, res) => {
+app.post("/api/process/:videoId", async (req, res) => {
   const { videoId } = req.params;
   if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-    return res.status(400).json({ error: 'Invalid video ID' });
+    return res.status(400).json({ error: "Invalid video ID" });
   }
 
   // Check if already processed
@@ -58,7 +57,7 @@ app.post('/api/process/:videoId', async (req, res) => {
       abstract: aiResult.abstract,
       summary: aiResult.summary,
       captionsRaw: ytData.captionsText,
-      captionLanguage: ytData.captionLanguage
+      captionLanguage: ytData.captionLanguage,
     };
 
     saveVideo(videoRecord);
@@ -73,50 +72,68 @@ app.post('/api/process/:videoId', async (req, res) => {
 });
 
 // API: Get markdown for download
-app.get('/api/video/:videoId/markdown', (req, res) => {
+app.get("/api/video/:videoId/markdown", (req, res) => {
   const { videoId } = req.params;
   const video = getVideo(videoId);
   if (!video) {
-    return res.status(404).json({ error: 'Video not found' });
+    return res.status(404).json({ error: "Video not found" });
   }
   const markdown = generateMarkdown(video);
-  res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="${videoId}.md"`);
+  res.setHeader("Content-Type", "text/markdown; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${videoId}.md"`);
   res.send(markdown);
 });
 
-const fs = require('fs');
-const markdownTemplate = fs.readFileSync(path.join(__dirname, 'template.md'), 'utf8');
-const videoHtmlTemplate = fs.readFileSync(path.join(__dirname, 'public', 'video.html'), 'utf8');
+const fs = require("fs");
+const markdownTemplate = fs.readFileSync(
+  path.join(__dirname, "template.md"),
+  "utf8",
+);
+const videoHtmlTemplate = fs.readFileSync(
+  path.join(__dirname, "public", "video.html"),
+  "utf8",
+);
 
 function generateMarkdown(video) {
-  return markdownTemplate.replace(/\{\{(\w+)\}\}/g, (_, key) => video[key] || '');
+  return markdownTemplate.replace(
+    /\{\{(\w+)\}\}/g,
+    (_, key) => video[key] || "",
+  );
 }
 
 // API: Get all videos
-app.get('/api/videos', (req, res) => {
+app.get("/api/videos", (req, res) => {
   res.json(getAllVideos());
 });
 
 // All videos page
-app.get('/all', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'all.html'));
+app.get("/all", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "all.html"));
 });
 
 // Catch-all: serve video page with OG meta tags
-app.get('/:videoId', (req, res) => {
+app.get("/:videoId", (req, res) => {
   const { videoId } = req.params;
   if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-    return res.status(404).send('Not found');
+    return res.status(404).send("Not found");
   }
 
   const video = getVideo(videoId);
 
-  const escHtml = (s) => s ? s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') : '';
+  const escHtml = (s) =>
+    s
+      ? s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;")
+      : "";
 
-  const title = video ? `TLDW - ${escHtml(video.video_title)}` : 'TLDW - Too Long Didn\'t Watch';
-  const description = video ? escHtml(video.abstract) : 'AI-powered YouTube video summary';
-  const image = video ? escHtml(video.thumbnail_url) : `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  const title = video
+    ? `TLDW - ${escHtml(video.video_title)}`
+    : "TLDW - Too Long Didn't Watch";
+  const description = video
+    ? escHtml(video.abstract)
+    : "AI-powered YouTube video summary";
+  const image = video
+    ? escHtml(video.thumbnail_url)
+    : `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
   const url = `https://tldw.viberaven.com/${videoId}`;
 
   const ogTags = `
@@ -130,9 +147,12 @@ app.get('/:videoId', (req, res) => {
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${image}">`;
 
-  let html = videoHtmlTemplate.replace('</head>', ogTags + '\n</head>');
+  let html = videoHtmlTemplate.replace("</head>", ogTags + "\n</head>");
   if (video) {
-    html = html.replace('<title>TLDW - Loading...</title>', `<title>${title}</title>`);
+    html = html.replace(
+      "<title>TLDW - Loading...</title>",
+      `<title>${title}</title>`,
+    );
   }
   res.send(html);
 });

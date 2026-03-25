@@ -1,64 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TLDW - All Videos</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' };
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  </script>
-  <style>
-    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-  </style>
-</head>
-<body class="bg-white dark:bg-gray-900 min-h-screen transition-colors">
-  <header class="border-b border-gray-200 dark:border-gray-700 px-6 py-3">
-    <a href="/" class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-      TLDW
-    </a>
-  </header>
-
-  <div class="max-w-5xl mx-auto px-6 py-8">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">All Videos</h1>
-    <table class="w-full">
-      <thead>
-        <tr class="border-b border-gray-200 dark:border-gray-700 text-left text-sm text-gray-500 dark:text-gray-400">
-          <th class="py-3 pr-4 w-12"></th>
-          <th class="py-3 pr-4">Channel</th>
-          <th class="py-3 pr-4 w-24"></th>
-          <th class="py-3 pr-4">Video</th>
-        </tr>
-      </thead>
-      <tbody id="video-list"></tbody>
-    </table>
-    <p id="empty" class="hidden text-gray-500 dark:text-gray-400 text-center py-12">No videos yet.</p>
-  </div>
-
-  <script>
-    (async () => {
-      const res = await fetch('/api/videos');
-      const videos = await res.json();
-      const tbody = document.getElementById('video-list');
-
-      if (videos.length === 0) {
-        document.getElementById('empty').classList.remove('hidden');
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TLDW - All Videos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
       }
+    </script>
+    <style>
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-white dark:bg-gray-900 min-h-screen transition-colors">
+    <header class="border-b border-gray-200 dark:border-gray-700 px-6 py-3">
+      <a
+        href="/"
+        class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100"
+      >
+        TLDW
+      </a>
+    </header>
 
-      const escHtml = s => s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : '';
+    <div class="max-w-5xl mx-auto px-6 py-8">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+        All Videos
+      </h1>
+      <table class="w-full">
+        <thead>
+          <tr
+            class="border-b border-gray-200 dark:border-gray-700 text-left text-sm text-gray-500 dark:text-gray-400"
+          >
+            <th class="py-3 pr-4 w-12"></th>
+            <th class="py-3 pr-4">Channel</th>
+            <th class="py-3 pr-4 w-24"></th>
+            <th class="py-3 pr-4">Video</th>
+          </tr>
+        </thead>
+        <tbody id="video-list"></tbody>
+      </table>
+      <p
+        id="empty"
+        class="hidden text-gray-500 dark:text-gray-400 text-center py-12"
+      >
+        No videos yet.
+      </p>
+    </div>
 
-      tbody.innerHTML = videos.map(v => `
+    <script>
+      (async () => {
+        const res = await fetch("/api/videos");
+        const videos = await res.json();
+        const tbody = document.getElementById("video-list");
+
+        if (videos.length === 0) {
+          document.getElementById("empty").classList.remove("hidden");
+          return;
+        }
+
+        const escHtml = (s) =>
+          s
+            ? s
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+            : "";
+
+        tbody.innerHTML = videos
+          .map(
+            (v) => `
         <tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition cursor-pointer" onclick="window.location='/${v.video_id}'">
           <td class="py-3 pr-4">
-            ${v.channel_avatar_url
-              ? `<img src="${escHtml(v.channel_avatar_url)}" alt="" class="w-10 h-10 rounded-full object-cover" />`
-              : `<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>`}
+            ${
+              v.channel_avatar_url
+                ? `<img src="${escHtml(v.channel_avatar_url)}" alt="" class="w-10 h-10 rounded-full object-cover" />`
+                : `<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>`
+            }
           </td>
           <td class="py-3 pr-4 text-sm text-gray-700 dark:text-gray-300">${escHtml(v.channel_name)}</td>
           <td class="py-3 pr-4">
@@ -68,8 +97,10 @@
             ${escHtml(v.video_title)}
           </td>
         </tr>
-      `).join('');
-    })();
-  </script>
-</body>
+      `,
+          )
+          .join("");
+      })();
+    </script>
+  </body>
 </html>

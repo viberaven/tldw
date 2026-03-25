@@ -1,13 +1,13 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+const Database = require("better-sqlite3");
+const path = require("path");
+const fs = require("fs");
 
-const dataDir = path.join(__dirname, 'data');
+const dataDir = path.join(__dirname, "data");
 fs.mkdirSync(dataDir, { recursive: true });
 
-const db = new Database(path.join(dataDir, 'tldw.db'));
+const db = new Database(path.join(dataDir, "tldw.db"));
 
-db.pragma('journal_mode = WAL');
+db.pragma("journal_mode = WAL");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS videos (
@@ -28,10 +28,15 @@ db.exec(`
 `);
 
 // Migrations: add columns that may be missing from older databases
-const existingColumns = new Set(db.pragma('table_info(videos)').map(c => c.name));
+const existingColumns = new Set(
+  db.pragma("table_info(videos)").map((c) => c.name),
+);
 const migrations = [
-  { col: 'channel_id', sql: 'ALTER TABLE videos ADD COLUMN channel_id TEXT' },
-  { col: 'channel_avatar_url', sql: 'ALTER TABLE videos ADD COLUMN channel_avatar_url TEXT' },
+  { col: "channel_id", sql: "ALTER TABLE videos ADD COLUMN channel_id TEXT" },
+  {
+    col: "channel_avatar_url",
+    sql: "ALTER TABLE videos ADD COLUMN channel_avatar_url TEXT",
+  },
 ];
 for (const { col, sql } of migrations) {
   if (!existingColumns.has(col)) {
@@ -40,7 +45,7 @@ for (const { col, sql } of migrations) {
 }
 
 function getVideo(videoId) {
-  return db.prepare('SELECT * FROM videos WHERE video_id = ?').get(videoId);
+  return db.prepare("SELECT * FROM videos WHERE video_id = ?").get(videoId);
 }
 
 function saveVideo(data) {
@@ -61,12 +66,16 @@ function saveVideo(data) {
     data.abstract,
     data.summary,
     data.captionsRaw,
-    data.captionLanguage
+    data.captionLanguage,
   );
 }
 
 function getAllVideos() {
-  return db.prepare('SELECT video_id, channel_name, channel_avatar_url, video_title, thumbnail_url, processed_at FROM videos ORDER BY processed_at DESC').all();
+  return db
+    .prepare(
+      "SELECT video_id, channel_name, channel_avatar_url, video_title, thumbnail_url, processed_at FROM videos ORDER BY processed_at DESC",
+    )
+    .all();
 }
 
 module.exports = { getVideo, saveVideo, getAllVideos };
