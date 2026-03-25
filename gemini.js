@@ -24,10 +24,10 @@ Your task:
    - Focus on KEY INSIGHTS, revelations, surprising claims, concrete examples, specific numbers/data, and actionable takeaways. Skip filler, repetition, ads, sponsor segments, and small talk.
    - Cover all major topics discussed in the video, not just the first few.
    - Weave timestamp links naturally into the text as inline markdown links on the most relevant keyword or phrase.
-   - Link format: [keyword or phrase](https://www.youtube.com/watch?v=${videoData.videoId}&t=SECONDSs) — use the seconds value from the captions (the number after | in each line).
-   - IMPORTANT: Use the EXACT seconds value from the captions. Do NOT concatenate MM:SS digits. For example, [59:30 | 3570s] means use t=3570s, NOT t=5930s.
-   - CORRECT example: Cílem jeho firmy je přeměna na tzv. [„Dark Factory"](https://www.youtube.com/watch?v=${videoData.videoId}&t=330s), kde většinu práce vykonávají AI agenti.
-   - WRONG example: Cílem jeho firmy je přeměna na tzv. „Dark Factory" [viz 330s](https://www.youtube.com/watch?v=${videoData.videoId}&t=330s).
+   - Link format: [keyword or phrase](T=SECONDSs) — use the seconds value from the captions (the number after | in each line).
+   - IMPORTANT: Use the EXACT seconds value from the captions. Do NOT concatenate MM:SS digits. For example, [59:30 | 3570s] means use T=3570s, NOT T=5930s.
+   - CORRECT example: Cílem jeho firmy je přeměna na tzv. [„Dark Factory"](T=330s), kde většinu práce vykonávají AI agenti.
+   - WRONG example: Cílem jeho firmy je přeměna na tzv. „Dark Factory" [viz 330s](T=330s).
    - The link should be ON the relevant word/phrase itself, not appended as a separate reference.
    - Use markdown formatting: headers (###, ####), bullet points, bold text as appropriate.
    - Structure the summary by topic/theme, not chronologically.
@@ -43,12 +43,16 @@ IMPORTANT: Write everything in the same language as the captions/video title. If
 Respond ONLY with valid JSON in this exact format (no markdown code blocks, just raw JSON):
 {
   "abstract": "Three sentence abstract here.",
-  "summary": "Detailed markdown summary with [timestamp links](url) here.",
+  "summary": "Detailed markdown summary with [timestamp links](T=123s) here.",
   "signal_density": 7,
   "perishability": 3,
   "replaceability": 4,
   "novelty": 6
 }`;
+
+  function replaceTimestamps(summary) {
+    return summary.replace(/\(T=(\d+)s\)/g, `(https://www.youtube.com/watch?v=${videoData.videoId}&t=$1s)`);
+  }
 
   const result = await model.generateContent(prompt);
   const responseText = result.response.text();
@@ -64,7 +68,7 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
     const parsed = JSON.parse(jsonStr);
     return {
       abstract: parsed.abstract,
-      summary: parsed.summary,
+      summary: replaceTimestamps(parsed.summary),
       signal_density: parsed.signal_density,
       perishability: parsed.perishability,
       replaceability: parsed.replaceability,
@@ -79,7 +83,7 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
       const parsed = JSON.parse(extracted);
       return {
         abstract: parsed.abstract,
-        summary: parsed.summary,
+        summary: replaceTimestamps(parsed.summary),
         signal_density: parsed.signal_density,
         perishability: parsed.perishability,
         replaceability: parsed.replaceability,
