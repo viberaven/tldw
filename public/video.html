@@ -132,9 +132,9 @@
         <div class="loading-dot bg-red-500"></div>
         <div class="loading-dot bg-yellow-500"></div>
       </div>
-      <p id="loading-text" class="text-gray-500 dark:text-gray-400 text-lg">
+      <div id="loading-text" class="text-gray-500 dark:text-gray-400 text-lg text-center space-y-4">
         Checking database...
-      </p>
+      </div>
     </div>
 
     <!-- Error state -->
@@ -234,7 +234,7 @@
           }
 
           setLoading(
-            "Fetching captions and generating AI summary... This may take a moment.",
+            "<p>Fetching captions and generating AI summary...</p><p>This usually takes about 15 seconds.</p><p>The page will update automatically — please do not refresh.</p>",
           );
           const processRes = await fetch(`/api/process/${id}`, {
             method: "POST",
@@ -253,7 +253,7 @@
       }
 
       function setLoading(text) {
-        document.getElementById("loading-text").textContent = text;
+        document.getElementById("loading-text").innerHTML = text;
       }
 
       function showError(message) {
