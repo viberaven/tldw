@@ -36,8 +36,8 @@ function stripMarkdown(text) {
     .trim();
 }
 
-// Split text into chunks of max ~4500 chars (under 5000 limit), breaking at sentence boundaries
-function chunkText(text, maxLen = 4500) {
+// Split text into chunks of max ~2000 chars (under 5000 limit), breaking at sentence boundaries
+function chunkText(text, maxLen = 2000) {
   if (text.length <= maxLen) return [text];
 
   const chunks = [];
