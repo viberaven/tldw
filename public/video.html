@@ -252,7 +252,7 @@
           }
 
           setLoading(
-            "<p>Fetching captions and generating AI summary...</p><p>This usually takes about 15 seconds.</p><p>The page will update automatically — please do not refresh.</p>",
+            "<p>Fetching captions and generating AI summary...</p><p>This usually takes about 30-45 seconds.</p><p>The page will update automatically — please do not refresh.</p>",
           );
           const processRes = await fetch(`/api/process/${id}`, {
             method: "POST",
@@ -308,21 +308,33 @@
         document.getElementById("youtube-link").href =
           `https://www.youtube.com/watch?v=${video.video_id}`;
 
-        // Check for audio
-        fetch(`/api/video/${video.video_id}/audio`, { method: "HEAD" }).then(
-          (r) => {
+        // Check for audio (poll a few times in case it's still generating)
+        function showAudio(videoId) {
+          const audioUrl = `/api/video/${videoId}/audio`;
+          document.getElementById("audio-player").src = audioUrl;
+          document.getElementById("audio-section").classList.remove("hidden");
+          const dlAudio = document.getElementById("download-audio");
+          dlAudio.href = audioUrl;
+          dlAudio.classList.remove("hidden");
+        }
+
+        (async function checkAudio() {
+          const delays = [
+            ...Array(5).fill(1000),
+            ...Array(5).fill(2000),
+            ...Array(5).fill(3000),
+            ...Array(5).fill(4000),
+            ...Array(5).fill(5000),
+          ];
+          for (const delay of delays) {
+            const r = await fetch(`/api/video/${video.video_id}/audio`, { method: "HEAD" });
             if (r.ok) {
-              const audioUrl = `/api/video/${video.video_id}/audio`;
-              document.getElementById("audio-player").src = audioUrl;
-              document
-                .getElementById("audio-section")
-                .classList.remove("hidden");
-              const dlAudio = document.getElementById("download-audio");
-              dlAudio.href = audioUrl;
-              dlAudio.classList.remove("hidden");
+              showAudio(video.video_id);
+              return;
             }
-          },
-        );
+            await new Promise((r) => setTimeout(r, delay));
+          }
+        })();
       }
     </script>
   </body>
