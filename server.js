@@ -3,6 +3,7 @@ const path = require("path");
 const { getVideo, saveVideo, getAllVideos } = require("./db");
 const { fetchVideoData } = require("./youtube");
 const { processVideo } = require("./gemini");
+const { generateVoice, getVoicePath } = require("./tts");
 const config = require("./config");
 
 const app = express();
@@ -63,6 +64,13 @@ app.post("/api/process/:videoId", async (req, res) => {
     saveVideo(videoRecord);
     console.log(`[${videoId}] Saved to database.`);
 
+    // Generate voice narration (non-blocking — don't fail the request if it errors)
+    if (config.GOOGLE_API_TTS_KEY) {
+      generateVoice(videoId, aiResult.abstract, aiResult.summary, ytData.captionLanguage)
+        .then(() => console.log(`[${videoId}] Voice generated.`))
+        .catch((err) => console.error(`[${videoId}] Voice error:`, err.message));
+    }
+
     const saved = getVideo(videoId);
     return res.json({ video: saved });
   } catch (err) {
@@ -100,6 +108,16 @@ function generateMarkdown(video) {
     (_, key) => video[key] || "",
   );
 }
+
+// API: Get voice audio
+app.get("/api/video/:videoId/audio", (req, res) => {
+  const { videoId } = req.params;
+  const voicePath = getVoicePath(videoId);
+  if (!voicePath) {
+    return res.status(404).json({ error: "Audio not available" });
+  }
+  res.sendFile(voicePath);
+});
 
 // API: Get all videos
 app.get("/api/videos", (req, res) => {

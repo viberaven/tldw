@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const config = require("./config");
 
-const genAI = new GoogleGenerativeAI(config.GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(config.GOOGLE_API_GENERATIVE_KEY);
 
 async function processVideo(videoData) {
   const model = genAI.getGenerativeModel({ model: config.MODEL });

@@ -176,6 +176,16 @@
           <img id="thumbnail" class="w-full rounded-lg shadow-sm mb-4" alt="" />
         </a>
       </div>
+      <!-- Audio -->
+      <div id="audio-section" class="hidden">
+        <hr class="my-6 border-gray-200 dark:border-gray-700" />
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            Audio
+          </h3>
+          <audio id="audio-player" controls class="w-full"></audio>
+        </div>
+      </div>
       <hr class="my-6 border-gray-200 dark:border-gray-700" />
       <div class="mb-8">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
@@ -201,7 +211,15 @@
           href="#"
           class="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
         >
-          Download Markdown
+          Download Markdown 📝
+        </a>
+        <a
+          id="download-audio"
+          href="#"
+          download
+          class="hidden px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+        >
+          Download Audio 🎧
         </a>
         <a
           id="youtube-link"
@@ -209,7 +227,7 @@
           target="_blank"
           class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"
         >
-          Watch Original
+          Watch Original ▶️
         </a>
       </div>
     </div>
@@ -289,6 +307,22 @@
           `/api/video/${video.video_id}/markdown`;
         document.getElementById("youtube-link").href =
           `https://www.youtube.com/watch?v=${video.video_id}`;
+
+        // Check for audio
+        fetch(`/api/video/${video.video_id}/audio`, { method: "HEAD" }).then(
+          (r) => {
+            if (r.ok) {
+              const audioUrl = `/api/video/${video.video_id}/audio`;
+              document.getElementById("audio-player").src = audioUrl;
+              document
+                .getElementById("audio-section")
+                .classList.remove("hidden");
+              const dlAudio = document.getElementById("download-audio");
+              dlAudio.href = audioUrl;
+              dlAudio.classList.remove("hidden");
+            }
+          },
+        );
       }
     </script>
   </body>
