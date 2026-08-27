@@ -142,12 +142,14 @@ app.get("/:videoId", (req, res) => {
     s
       ? s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;")
       : "";
+  const stripLinks = (s) =>
+    s ? s.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") : "";
 
   const title = video
     ? `TLDW - ${escHtml(video.video_title)}`
     : "TLDW - Too Long Didn't Watch";
   const description = video
-    ? escHtml(video.abstract)
+    ? escHtml(stripLinks(video.abstract))
     : "AI-powered YouTube video summary";
   const image = video
     ? escHtml(video.thumbnail_url)

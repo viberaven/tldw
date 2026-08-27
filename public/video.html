@@ -191,10 +191,10 @@
         <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
           Abstract
         </h3>
-        <p
+        <div
           id="abstract"
-          class="text-gray-700 dark:text-gray-300 leading-relaxed"
-        ></p>
+          class="prose text-gray-700 dark:text-gray-300 leading-relaxed"
+        ></div>
       </div>
       <hr class="my-6 border-gray-200 dark:border-gray-700" />
       <div class="mb-8">
@@ -280,6 +280,13 @@
         document.getElementById("error-detail").textContent = message;
       }
 
+      function replaceTimestamps(text, videoId) {
+        return (text || "").replace(
+          /\(T=(\d+)s\)/g,
+          `(https://www.youtube.com/watch?v=${videoId}&t=$1s)`,
+        );
+      }
+
       function renderVideo(video) {
         document.getElementById("loading").classList.add("hidden");
         document.getElementById("content").classList.remove("hidden");
@@ -299,9 +306,11 @@
         document.getElementById("thumbnail").alt = video.video_title;
         document.getElementById("thumbnail-link").href =
           `https://www.youtube.com/watch?v=${video.video_id}`;
-        document.getElementById("abstract").textContent = video.abstract;
+        document.getElementById("abstract").innerHTML = marked.parse(
+          replaceTimestamps(video.abstract, video.video_id),
+        );
         document.getElementById("summary").innerHTML = marked.parse(
-          video.summary || "",
+          replaceTimestamps(video.summary, video.video_id),
         );
         document.getElementById("download-md").href =
           `/api/video/${video.video_id}/markdown`;

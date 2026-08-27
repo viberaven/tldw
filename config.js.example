@@ -2,5 +2,5 @@ module.exports = {
   GOOGLE_API_GENERATIVE_KEY: "generative-key",
   GOOGLE_API_TTS_KEY: "tts-key",
 
-  MODEL: "gemini-3.1-flash-lite-preview",
+  MODEL: "gemini-3.7-flash-lite",
 };

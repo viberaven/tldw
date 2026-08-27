@@ -23,25 +23,25 @@ Your task:
    - The summary should be PROPORTIONAL to the video length. As a rough guide: ~500 words per 30 minutes of video. A 1-hour video should produce ~1000 words, a 2-hour video ~2000 words.
    - Focus on KEY INSIGHTS, revelations, surprising claims, concrete examples, specific numbers/data, and actionable takeaways. Skip filler, repetition, ads, sponsor segments, and small talk.
    - Cover all major topics discussed in the video, not just the first few.
-   - Weave timestamp links naturally into the text as inline markdown links on the most relevant keyword or phrase.
+   - Use markdown formatting: headers (###, ####), bullet points, bold text as appropriate.
+   - Structure the summary by topic/theme, not chronologically.
+3. Weave timestamp links naturally into both the abstract and summary as inline markdown links on the most relevant keyword or phrase.
    - Link format: [keyword or phrase](T=SECONDSs) — use the seconds value from the captions (the number after | in each line).
    - IMPORTANT: Use the EXACT seconds value from the captions. Do NOT concatenate MM:SS digits. For example, [59:30 | 3570s] means use T=3570s, NOT T=5930s.
    - CORRECT example: Cílem jeho firmy je přeměna na tzv. [„Dark Factory"](T=330s), kde většinu práce vykonávají AI agenti.
    - WRONG example: Cílem jeho firmy je přeměna na tzv. „Dark Factory" [viz 330s](T=330s).
    - The link should be ON the relevant word/phrase itself, not appended as a separate reference.
-   - Use markdown formatting: headers (###, ####), bullet points, bold text as appropriate.
-   - Structure the summary by topic/theme, not chronologically.
 
 IMPORTANT: Write everything in the same language as the captions/video title. If the video is in Czech, write in Czech. If in English, write in English. Etc.
 
 Respond ONLY with valid JSON in this exact format (no markdown code blocks, just raw JSON):
 {
-  "abstract": "Three sentence abstract here.",
+  "abstract": "Three sentence abstract with [timestamp links](T=123s) here.",
   "summary": "Detailed markdown summary with [timestamp links](T=123s) here."
 }`;
 
-  function replaceTimestamps(summary) {
-    return summary.replace(
+  function replaceTimestamps(text) {
+    return text.replace(
       /\(T=(\d+)s\)/g,
       `(https://www.youtube.com/watch?v=${videoData.videoId}&t=$1s)`,
     );
@@ -60,7 +60,7 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
   try {
     const parsed = JSON.parse(jsonStr);
     return {
-      abstract: parsed.abstract,
+      abstract: replaceTimestamps(parsed.abstract),
       summary: replaceTimestamps(parsed.summary),
     };
   } catch (e) {
@@ -71,7 +71,7 @@ Respond ONLY with valid JSON in this exact format (no markdown code blocks, just
       const extracted = responseText.substring(startIdx, endIdx + 1);
       const parsed = JSON.parse(extracted);
       return {
-        abstract: parsed.abstract,
+        abstract: replaceTimestamps(parsed.abstract),
         summary: replaceTimestamps(parsed.summary),
       };
     }
